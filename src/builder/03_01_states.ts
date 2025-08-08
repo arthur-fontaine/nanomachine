@@ -3,13 +3,11 @@ import { StateMachineInitialBuilder } from "./04_initial.ts";
 
 export class StateMachineStatesBuilder<
 	CONTEXT_TYPE,
-	EVENTS extends {
-		[key: string]: unknown;
-	},
+	EVENTS extends { [key: string]: unknown },
 > {
 	private atom: nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>;
 
-	constructor(atom: nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>) {
+	constructor(atom: typeof this.atom) {
 		this.atom = atom;
 	}
 

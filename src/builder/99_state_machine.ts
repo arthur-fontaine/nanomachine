@@ -4,9 +4,7 @@ import { StateMachineStateBuilder } from "./03_02_state.js";
 export class StateMachine<
 	CONTEXT_TYPE,
 	STATE_TYPES extends string,
-	EVENTS extends {
-		[key: string]: unknown;
-	},
+	EVENTS extends { [key: string]: unknown },
 > {
 	private $stateAtom: nanostores.PreinitializedWritableAtom<STATE_TYPES>;
 	private started = false;

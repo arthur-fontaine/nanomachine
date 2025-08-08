@@ -4,15 +4,11 @@ import { StateMachineStatesBuilder } from "./03_01_states.ts";
 export class StateMachineEventsBuilder<CONTEXT_TYPE> {
 	private atom: nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>;
 
-	constructor(atom: nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>) {
+	constructor(atom: typeof this.atom) {
 		this.atom = atom;
 	}
 
-	events<
-		EVENTS extends {
-			[key: string]: [] | [unknown];
-		},
-	>() {
+	events<EVENTS extends { [key: string]: [] | [unknown] }>() {
 		return new StateMachineStatesBuilder<
 			CONTEXT_TYPE,
 			{
