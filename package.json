@@ -2,7 +2,7 @@
 	"name": "nanomachine",
 	"type": "module",
 	"version": "1.0.0",
-	"description": "A fully-typed and composable state machine builder.",
+	"description": "A fully-typed and modular state machine builder.",
 	"exports": {
 		".": {
 			"import": "./dist/index.js",
@@ -15,7 +15,10 @@
 		"lint:fix": "biome lint --write",
 		"format": "biome format",
 		"format:fix": "biome format --write",
-		"build": "tsdown src/index.ts -d dist -f esm,cjs --dts"
+		"build": "tsdown src/index.ts -d dist -f esm,cjs --dts",
+		"docs:dev": "vitepress dev docs",
+		"docs:build": "vitepress build docs",
+		"docs:preview": "vitepress preview docs"
 	},
 	"keywords": [],
 	"author": "Arthur Fontaine <me@arthurfontaine.com>",
@@ -27,7 +30,8 @@
 		"@tsconfig/strictest": "^2.0.5",
 		"@types/node": "^24.2.1",
 		"tsdown": "^0.13.4",
-		"typescript": "^5.9.2"
+		"typescript": "^5.9.2",
+		"vitepress": "^1.6.4"
 	},
 	"dependencies": {
 		"nanostores": "^1.0.1",
