@@ -6,20 +6,16 @@ export class StateMachine<
 	STATE_TYPES extends string,
 	EVENTS extends { [key: string]: unknown },
 > {
-	private $stateAtom: nanostores.PreinitializedWritableAtom<STATE_TYPES>;
-	private started = false;
-	private atom: nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>;
+	private initialState: STATE_TYPES;
+	private createAtom: () => nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>;
 	private states: {
 		[key in STATE_TYPES]: (
 			stateBuilder: StateMachineStateBuilder<CONTEXT_TYPE, STATE_TYPES, EVENTS>,
 		) => void;
 	};
-	private resolve: () => void;
-	private reject: (error: Error) => void;
-	private promise: Promise<void>;
 
 	constructor(
-		atom: nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>,
+		createAtom: () => nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>,
 		states: {
 			[key in STATE_TYPES]: (
 				stateBuilder: StateMachineStateBuilder<
@@ -31,81 +27,72 @@ export class StateMachine<
 		},
 		initialState: STATE_TYPES,
 	) {
-		this.$stateAtom = nanostores.atom(initialState);
-		this.atom = atom;
-		this.states = states;
 
-		const { promise, resolve, reject } = Promise.withResolvers<void>();
-		this.promise = promise;
-		this.resolve = resolve;
-		this.reject = reject;
+		this.createAtom = createAtom;
+		this.states = states;
+		this.initialState = initialState;
 	}
 
 	start(context: CONTEXT_TYPE) {
-		if (this.started) {
-			return this;
+		const atom = this.createAtom();
+		const stateAtom = nanostores.atom<STATE_TYPES>(this.initialState);
+
+		const { promise, resolve, reject } = Promise.withResolvers<void>();
+
+		const states = this.states;
+
+		function get() {
+			return atom.get();
 		}
-		this.started = true;
-		this.atom.set(context);
-		this.$stateAtom.subscribe((state) => {
+
+		function set(value: CONTEXT_TYPE) {
+			atom.set(value);
+		}
+
+		function emit<K extends keyof EVENTS>(
+			...[event, payload]: EVENTS[K] extends undefined ? [K] : [K, EVENTS[K]]
+		) {
+			const state = stateAtom.get();
+			states[state]?.(
+				new StateMachineStateBuilder(
+					atom,
+					stateAtom,
+					event,
+					payload as never,
+					emit,
+					resolve,
+					reject,
+					["onReceive"],
+				),
+			);
+		}
+
+		function subscribe(listener: (value: CONTEXT_TYPE) => void): () => void {
+			return atom.subscribe(listener);
+		}
+
+		atom.set(context);
+		stateAtom.subscribe((state) => {
 			this.states[state]?.(
 				new StateMachineStateBuilder(
-					this.atom,
-					this.$stateAtom,
+					atom,
+					stateAtom,
 					null!,
 					null!,
-					this.emit.bind(this),
-					this.resolve,
-					this.reject,
+					emit,
+					resolve,
+					reject,
 				),
 			);
 		});
 
-		this.promise.catch((error) => {
-			this.started = false;
-		});
-
-		return this;
-	}
-
-	get() {
-		return this.atom.get();
-	}
-
-	set(value: CONTEXT_TYPE) {
-		this.atom.set(value);
-	}
-
-	emit<K extends keyof EVENTS>(
-		...[event, payload]: EVENTS[K] extends undefined ? [K] : [K, EVENTS[K]]
-	) {
-		if (!this.started) {
-			return;
-		}
-		const state = this.$stateAtom.get();
-		this.states[state]?.(
-			new StateMachineStateBuilder(
-				this.$atom,
-				this.$stateAtom,
-				event,
-				payload as never,
-				this.emit.bind(this),
-				this.resolve,
-				this.reject,
-				["onReceive"],
-			),
-		);
-	}
-
-	subscribe(listener: (value: CONTEXT_TYPE) => void): () => void {
-		return this.atom.subscribe(listener);
-	}
-
-	get $atom() {
-		return this.atom;
-	}
-
-	get $promise() {
-		return this.promise;
+		return {
+			get,
+			set,
+			emit,
+			subscribe,
+			$atom: atom,
+			$promise: promise,
+		};
 	}
 }

@@ -7,11 +7,11 @@ export class StateMachineFinalBuilder<
 	STATE_TYPES extends string,
 	EVENTS extends { [key: string]: unknown },
 > {
-	private atom: nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>;
+	private createAtom: () => nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>;
 	private initialState: STATE_TYPES;
 
-	constructor(atom: typeof this.atom, initialState: typeof this.initialState) {
-		this.atom = atom;
+	constructor(createAtom: () => nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>, initialState: STATE_TYPES) {
+		this.createAtom = createAtom;
 		this.initialState = initialState;
 	}
 
@@ -33,7 +33,7 @@ export class StateMachineFinalBuilder<
 		},
 	) {
 		return new StateMachine<CONTEXT_TYPE, STATE_TYPES, EVENTS>(
-			this.atom,
+			this.createAtom,
 			states,
 			this.initialState,
 		);
