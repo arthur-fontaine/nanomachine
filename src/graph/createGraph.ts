@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { getCallSites } from "node:util";
-import { CallExpression, Identifier, Node, ObjectLiteralExpression, Project, type Symbol as TsMorphSymbol, SyntaxKind, VariableDeclaration, type SourceFile, FunctionExpression, ArrowFunction } from "ts-morph";
+import { CallExpression, Identifier, ImportSpecifier, Node, ObjectLiteralExpression, Project, PropertyAssignment, ShorthandPropertyAssignment, Symbol as TsMorphSymbol, SyntaxKind, VariableDeclaration, type SourceFile, FunctionExpression, ArrowFunction, type Type, UnionTypeNode } from "ts-morph";
 import type { StateMachine } from "../builder/99_state_machine.ts";
 import { Graph } from "./Graph.ts";
 
@@ -11,7 +11,7 @@ export function createGraph(machine: StateMachine<any, any, any>) {
 
   const project = new Project({
     ...(tsConfigPath ? { tsConfigFilePath: tsConfigPath } : {}),
-    skipAddingFilesFromTsConfig: false,
+      skipAddingFilesFromTsConfig: false,
   });
 
   project.resolveSourceFileDependencies();
@@ -35,19 +35,43 @@ export function createGraph(machine: StateMachine<any, any, any>) {
   stateDeclarations.forEach(({ stateName, initializer }) => {
     graph.addNode(stateName);
     const returnType = initializer.getReturnType();
-
+    
     const nextStatesType = returnType.getTypeArguments()[3];
     if (!nextStatesType) throw new Error(`Unable to determine next states type for state: ${stateName}`);
 
-    const nextStates: string[] = [];
+    // const nextStates: string[] = [];
 
-    if (nextStatesType.isUnion()) nextStatesType.getUnionTypes().forEach(t => nextStates.push(t.getText()));
-    if (nextStatesType.isStringLiteral()) nextStates.push(nextStatesType.getLiteralValue() as string);
+    // if (nextStatesType.isUnion()) nextStatesType.getUnionTypes().forEach(t => nextStates.push(t.getText()));
+    // if (nextStatesType.isStringLiteral()) nextStates.push(nextStatesType.getLiteralValue() as string);
 
-    nextStates.forEach(ns => {
-      const text = ns.replace(/^["']|["']$/g, ''); // Remove quotes if string literal
-      graph.addNode(text);
-      graph.addEdge(stateName, text);
+    const nextStatesTypes = nextStatesType.isUnion() ? nextStatesType.getUnionTypes() : [nextStatesType];
+
+    console.log({ stateName, nextStatesTypes: nextStatesTypes.map(t => t.getText()) });
+
+    nextStatesTypes.forEach(t => {
+      const text = t.getText();
+      const stateType = text.startsWith('Guard') ? 'guard' : text.startsWith('Receive') ? 'continue' : undefined;
+      if (!stateType) throw new Error(`Unsupported next state type: ${text} in state: ${stateName}`);
+
+      const nextStatesArgs = t.getAliasTypeArguments();
+      console.log(t.getText(), { nextStatesArgs: nextStatesArgs.map(ta => ta.getText()) });
+      console.log(t);
+      if (nextStatesArgs.length !== 1) throw new Error(`Unexpected number of type arguments for next state type: ${text} in state: ${stateName}`);
+
+      const nextStatesArg = nextStatesArgs[0]!;
+      const nextStates: string[] = [];
+
+      if (nextStatesArg.isUnion()) nextStatesArg.getUnionTypes().forEach(ut => {
+        if (ut.isStringLiteral()) nextStates.push(ut.getLiteralValue() as string);
+        else throw new Error(`Unsupported union type in next states: ${ut.getText()} in state: ${stateName}`);
+      });
+      else if (nextStatesArg.isStringLiteral()) nextStates.push(nextStatesArg.getLiteralValue() as string);
+      else throw new Error(`Unsupported next states argument type: ${nextStatesArg.getText()} in state: ${stateName}`);
+
+      nextStates.forEach(ns => {
+        graph.addNode(ns);
+        graph.addEdge(stateName, ns, stateType);
+      });
     });
   });
 

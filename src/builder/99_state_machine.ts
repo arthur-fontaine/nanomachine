@@ -1,5 +1,5 @@
 import * as nanostores from "nanostores";
-import { StateMachineStateBuilder } from "./03_02_state.js";
+import { StateMachineStateBuilder } from "./03_02_state.ts";
 
 export class StateMachine<
 	CONTEXT_TYPE,

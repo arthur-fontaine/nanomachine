@@ -2,13 +2,17 @@ import type * as nanostores from "nanostores";
 import type { MergeDeep } from "type-fest";
 import type { MaybePromise } from "../types/MaybePromise.ts";
 
+type GuardNextStateType<STATE_TYPE extends string> = { STATE: STATE_TYPE, TYPE: "guard" };
+type ReceiveNextStateType<STATE_TYPE extends string> = { STATE: STATE_TYPE, TYPE: "receive" };
+type AnyNextStateType<STATE_TYPE extends string> = GuardNextStateType<STATE_TYPE> | ReceiveNextStateType<STATE_TYPE>;
+
 export class StateMachineStateBuilder<
 	CONTEXT_TYPE,
 	STATE_TYPES extends (string & {}) | "$_END",
 	EVENTS extends {
 		[key: string]: unknown;
 	},
-	NEXT_STATE_TYPES extends STATE_TYPES = never,
+	NEXT_STATE_TYPES extends AnyNextStateType<STATE_TYPES> = never,
 > {
 	private atom: nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>;
 	private stateAtom: nanostores.PreinitializedWritableAtom<STATE_TYPES>;
@@ -68,7 +72,7 @@ export class StateMachineStateBuilder<
 		CONTEXT_TYPE,
 		STATE_TYPES,
 		EVENTS,
-		NEXT_STATE_TYPES | NoInfer<NEXT_STATE_TYPE>
+		NEXT_STATE_TYPES | GuardNextStateType<NoInfer<NEXT_STATE_TYPE>>
 	> {
 		try {
 			this.stopPropagation =
@@ -93,7 +97,7 @@ export class StateMachineStateBuilder<
 		MergeDeep<CONTEXT_TYPE, { [key in K]: T }>,
 		STATE_TYPES,
 		EVENTS,
-		NEXT_STATE_TYPES | NoInfer<NEXT_STATE_TYPE>
+		NEXT_STATE_TYPES | GuardNextStateType<NoInfer<NEXT_STATE_TYPE>>
 	> {
 		try {
 			const currentState = this.atom.get();
@@ -142,7 +146,7 @@ export class StateMachineStateBuilder<
 		CONTEXT_TYPE,
 		STATE_TYPES,
 		EVENTS,
-		NEXT_STATE_TYPES | NoInfer<NEXT_STATE_TYPE>
+		NEXT_STATE_TYPES | ReceiveNextStateType<NoInfer<NEXT_STATE_TYPE>>
 	> {
 		if (!this.enabledEvents.includes("onReceive")) return this;
 		if (this.stopPropagation) return this;
