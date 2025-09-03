@@ -15,7 +15,13 @@ export default defineConfig({
 			{
 				text: "Introduction",
 				items: [
-					{ text: "Why Nanomachine?", link: "/why-nanomachine" },
+					{
+						text: "Why Nanomachine?",
+						link: "/why-nanomachine",
+						items: [
+							{ text: "Comparison with XState", link: "/why-nanomachine#xstate" },
+						],
+					},
 					{ text: "Getting Started", link: "/getting-started" },
 					{ text: "Overview", link: "/overview" },
 				],
