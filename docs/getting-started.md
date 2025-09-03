@@ -26,4 +26,8 @@ npm install nanomachine
 bun add nanomachine
 ```
 
+```ts [deno]
+import { createStateMachine } from "npm:nanomachine";
+```
+
 :::
