@@ -4,10 +4,11 @@ import type { MaybePromise } from "../types/MaybePromise.ts";
 
 export class StateMachineStateBuilder<
 	CONTEXT_TYPE,
-	STATE_TYPES extends string,
+	STATE_TYPES extends (string & {}) | "$_END",
 	EVENTS extends {
 		[key: string]: unknown;
 	},
+	NEXT_STATE_TYPES extends STATE_TYPES = never,
 > {
 	private atom: nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>;
 	private stateAtom: nanostores.PreinitializedWritableAtom<STATE_TYPES>;
@@ -60,10 +61,15 @@ export class StateMachineStateBuilder<
 		return this as never;
 	}
 
-	guard(
+	guard<NEXT_STATE_TYPE extends STATE_TYPES>(
 		evalGuard: (state: CONTEXT_TYPE) => boolean,
-		fallbackState: STATE_TYPES,
-	): typeof this {
+		fallbackState: NEXT_STATE_TYPE,
+	): StateMachineStateBuilder<
+		CONTEXT_TYPE,
+		STATE_TYPES,
+		EVENTS,
+		NEXT_STATE_TYPES | NoInfer<NEXT_STATE_TYPE>
+	> {
 		try {
 			this.stopPropagation =
 				this.stopPropagation || !evalGuard(this.atom.get());
@@ -75,15 +81,19 @@ export class StateMachineStateBuilder<
 		return this;
 	}
 
-	guardContext<K extends keyof CONTEXT_TYPE, T extends CONTEXT_TYPE[K]>(
+	guardContext<
+		K extends keyof CONTEXT_TYPE,
+		T extends CONTEXT_TYPE[K],
+		NEXT_STATE_TYPE extends STATE_TYPES,
+	>(
 		property: K,
 		evalGuard: (state: CONTEXT_TYPE[K]) => state is T,
-		fallbackState: STATE_TYPES,
+		fallbackState: NEXT_STATE_TYPE,
 	): StateMachineStateBuilder<
-		// { [key in K]: T } & Omit<CONTEXT_TYPE, K>,
 		MergeDeep<CONTEXT_TYPE, { [key in K]: T }>,
 		STATE_TYPES,
-		EVENTS
+		EVENTS,
+		NEXT_STATE_TYPES | NoInfer<NEXT_STATE_TYPE>
 	> {
 		try {
 			const currentState = this.atom.get();
@@ -120,15 +130,20 @@ export class StateMachineStateBuilder<
 		return this;
 	}
 
-	onReceive(
+	onReceive<NEXT_STATE_TYPE extends STATE_TYPES>(
 		events: {
 			[key in keyof EVENTS]?: (
 				...[context, set, payload]: EVENTS[key] extends undefined
 					? [CONTEXT_TYPE, (value: Partial<CONTEXT_TYPE>) => void]
 					: [CONTEXT_TYPE, (value: Partial<CONTEXT_TYPE>) => void, EVENTS[key]]
-			) => STATE_TYPES | "$_END" | false | undefined;
+			) => NEXT_STATE_TYPE | false | undefined;
 		},
-	): typeof this {
+	): StateMachineStateBuilder<
+		CONTEXT_TYPE,
+		STATE_TYPES,
+		EVENTS,
+		NEXT_STATE_TYPES | NoInfer<NEXT_STATE_TYPE>
+	> {
 		if (!this.enabledEvents.includes("onReceive")) return this;
 		if (this.stopPropagation) return this;
 

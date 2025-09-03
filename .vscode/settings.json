@@ -1,3 +1,6 @@
 {
-	"conventionalCommits.scopes": ["builder"]
+	"conventionalCommits.scopes": [
+		"builder",
+		"graph"
+	]
 }
