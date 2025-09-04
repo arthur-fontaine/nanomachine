@@ -44,7 +44,6 @@ export default defineConfig({
 				text: "Tips & Tricks",
 				items: [
 					{ text: "File Split", link: "/tips/file-split" },
-					{ text: "Type Inference", link: "/tips/type-inference" },
 				],
 			},
 			{

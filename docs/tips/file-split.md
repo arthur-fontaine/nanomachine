@@ -6,7 +6,7 @@ outline: deep
 
 # File Split
 
-Nanomachine allows you to define your state machine in a modular way, making it easy to manage and scale. This can be particularly useful when your state machine grows in complexity or size. By splitting your state machine into multiple files, you can keep your codebase organized and maintainable.
+Nanomachine enables you to define your state machine modularly, facilitating management and scalability. This approach is especially beneficial as your state machine increases in complexity or size. By dividing your state machine into multiple files, you can keep your codebase organized and maintainable.
 
 ## Example Structure
 
@@ -35,16 +35,16 @@ interface MachineContext {
 }
 
 export const machineConfig = createStateMachine()
- .context<MachineContext>()
- .events<{
-  INCREMENT: [number];
+  .context<MachineContext>()
+  .events<{
+    INCREMENT: [number];
     RESET: [];
- }>()
- .states<
-  | "IDLE"
-  | "COUNTING"
- >()
- .initial("IDLE");
+  }>()
+  .states<
+    | "IDLE"
+    | "COUNTING"
+  >()
+  .initial("IDLE");
 ```
 
 ## `machine.ts`
