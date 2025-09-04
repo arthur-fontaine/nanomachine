@@ -22,8 +22,14 @@ export default defineConfig({
 							{ text: "Comparison with XState", link: "/why-nanomachine#xstate" },
 						],
 					},
-					{ text: "Getting Started", link: "/getting-started" },
-					{ text: "Overview", link: "/overview" },
+					{
+						text: "Getting Started",
+						link: "/getting-started",
+						items: [
+							{ text: "Installation", link: "/getting-started#installation" },
+							{ text: "Overview", link: "/getting-started#overview" },
+						],
+					},
 				],
 			},
 			{
