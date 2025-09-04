@@ -4,7 +4,9 @@ import { StateMachineStatesBuilder } from "./03_01_states.ts";
 export class StateMachineEventsBuilder<CONTEXT_TYPE> {
 	private createAtom: () => nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>;
 
-	constructor(createAtom: () => nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>) {
+	constructor(
+		createAtom: () => nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>,
+	) {
 		this.createAtom = createAtom;
 	}
 

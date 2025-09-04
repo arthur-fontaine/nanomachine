@@ -10,7 +10,10 @@ export class StateMachineFinalBuilder<
 	private createAtom: () => nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>;
 	private initialState: STATE_TYPES;
 
-	constructor(createAtom: () => nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>, initialState: STATE_TYPES) {
+	constructor(
+		createAtom: () => nanostores.PreinitializedWritableAtom<CONTEXT_TYPE>,
+		initialState: STATE_TYPES,
+	) {
 		this.createAtom = createAtom;
 		this.initialState = initialState;
 	}

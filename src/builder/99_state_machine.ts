@@ -27,7 +27,6 @@ export class StateMachine<
 		},
 		initialState: STATE_TYPES,
 	) {
-
 		this.createAtom = createAtom;
 		this.states = states;
 		this.initialState = initialState;
