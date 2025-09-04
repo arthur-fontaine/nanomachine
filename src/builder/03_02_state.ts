@@ -2,13 +2,21 @@ import type * as nanostores from "nanostores";
 import type { MergeDeep } from "type-fest";
 import type { MaybePromise } from "../types/MaybePromise.ts";
 
-type GuardNextStateType<STATE_TYPE extends string> = { STATE: STATE_TYPE, TYPE: "guard" };
-type ReceiveNextStateType<STATE_TYPE extends string> = { STATE: STATE_TYPE, TYPE: "receive" };
-type AnyNextStateType<STATE_TYPE extends string> = GuardNextStateType<STATE_TYPE> | ReceiveNextStateType<STATE_TYPE>;
+type GuardNextStateType<STATE_TYPE extends string> = {
+	STATE: STATE_TYPE;
+	TYPE: "guard";
+};
+type ReceiveNextStateType<STATE_TYPE extends string> = {
+	STATE: STATE_TYPE;
+	TYPE: "receive";
+};
+type AnyNextStateType<STATE_TYPE extends string> =
+	| GuardNextStateType<STATE_TYPE>
+	| ReceiveNextStateType<STATE_TYPE>;
 
 export class StateMachineStateBuilder<
 	CONTEXT_TYPE,
-	STATE_TYPES extends (string & {}) | "$_END",
+	STATE_TYPES extends string,
 	EVENTS extends {
 		[key: string]: unknown;
 	},
@@ -134,14 +142,20 @@ export class StateMachineStateBuilder<
 		return this;
 	}
 
-	onReceive<NEXT_STATE_TYPE extends STATE_TYPES>(
-		events: {
+	onReceive<
+		EVENT_STATE_MAPPING extends {
 			[key in keyof EVENTS]?: (
 				...[context, set, payload]: EVENTS[key] extends undefined
 					? [CONTEXT_TYPE, (value: Partial<CONTEXT_TYPE>) => void]
 					: [CONTEXT_TYPE, (value: Partial<CONTEXT_TYPE>) => void, EVENTS[key]]
-			) => NEXT_STATE_TYPE | false | undefined;
+			) => STATE_TYPES | false | undefined;
 		},
+		NEXT_STATE_TYPE extends STATE_TYPES = Extract<
+			ReturnType<NonNullable<EVENT_STATE_MAPPING[keyof EVENT_STATE_MAPPING]>>,
+			STATE_TYPES
+		>,
+	>(
+		events: EVENT_STATE_MAPPING,
 	): StateMachineStateBuilder<
 		CONTEXT_TYPE,
 		STATE_TYPES,
