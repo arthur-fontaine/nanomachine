@@ -29,23 +29,8 @@ export default defineConfig({
 			{
 				text: "Usage",
 				items: [
-					{ text: "Context", link: "/usage/context" },
-					{ text: "Events", link: "/usage/events" },
-					{ text: "States", link: "/usage/states" },
-					{ text: "Initial", link: "/usage/initial" },
-					{
-						text: "Implement",
-						link: "/usage/implement",
-						items: [
-							{ text: "guard", link: "/usage/implement#guard" },
-							{ text: "guardContext", link: "/usage/implement#guardcontext" },
-							{ text: "localEvent", link: "/usage/implement#localevent" },
-							{ text: "onEntry", link: "/usage/implement#onentry" },
-							{ text: "onReceive", link: "/usage/implement#onreceive" },
-							{ text: "after", link: "/usage/implement#after" },
-						],
-					},
-					{ text: "State Machine", link: "/usage/state-machine" },
+					{ text: "Create a State Machine", link: "/usage/create-state-machine" },
+					{ text: "Implement States", link: "/usage/implement-states" },
 				],
 			},
 			{
