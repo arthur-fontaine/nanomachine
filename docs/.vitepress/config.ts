@@ -38,12 +38,7 @@ export default defineConfig({
 					{ text: "Create a State Machine", link: "/usage/create-state-machine" },
 					{ text: "Implement States", link: "/usage/implement-states" },
 					{ text: "Graph", link: "/usage/graph" },
-				],
-			},
-			{
-				text: "Tips & Tricks",
-				items: [
-					{ text: "File Split", link: "/tips/file-split" },
+					{ text: "File Splitting", link: "/usage/file-splitting" },
 				],
 			},
 			{
