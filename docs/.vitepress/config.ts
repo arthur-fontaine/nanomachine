@@ -37,6 +37,7 @@ export default defineConfig({
 				items: [
 					{ text: "Create a State Machine", link: "/usage/create-state-machine" },
 					{ text: "Implement States", link: "/usage/implement-states" },
+					{ text: "Graph", link: "/usage/graph" },
 				],
 			},
 			{

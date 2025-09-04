@@ -8,6 +8,11 @@
 			"import": "./dist/index.js",
 			"require": "./dist/index.cjs",
 			"default": "./dist/index.d.ts"
+		},
+		"./graph": {
+			"import": "./dist/graph/createGraph.js",
+			"require": "./dist/graph/createGraph.cjs",
+			"default": "./dist/graph/createGraph.d.ts"
 		}
 	},
 	"scripts": {
@@ -15,7 +20,7 @@
 		"lint:fix": "biome lint --write",
 		"format": "biome format",
 		"format:fix": "biome format --write",
-		"build": "tsdown src/index.ts -d dist -f esm,cjs --dts",
+		"build": "tsdown src/index.ts src/graph/createGraph.ts -d dist -f esm,cjs --dts",
 		"docs:dev": "vitepress dev docs",
 		"docs:build": "vitepress build docs",
 		"docs:preview": "vitepress preview docs"
